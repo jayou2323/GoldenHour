@@ -17,15 +17,6 @@ export default function SetReadyTimes() {
     const departure = useSelector((state) => state.time.departure);
     const dispatch = useDispatch();
 
-    function getTimeString(dateObj){
-        return dateObj.getFullYear() + "-" + 
-        (dateObj.getMonth()+1) + "-" + 
-        dateObj.getDate() + "/" + 
-        dateObj.getHours() + ":" + 
-        dateObj.getMinutes() + ":" + 
-        dateObj.getSeconds();
-    }
-
     // 총 준비시간의 최대값 : 출발시간 - 현재시간
     const [maximumReadyTime, setMaximumReadyTime] = useState(parseInt((departure-currentTime)/(1000*60)));
     const [totalReadyTime, setTotalReadyTime] = useState(parseInt(maximumReadyTime/2)); // 총 준비 시간

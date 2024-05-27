@@ -1,5 +1,6 @@
 import { AppState, Platform, Modal, Animated, StyleSheet,
-     View, Image, Dimensions, SafeAreaView } from 'react-native';
+     View, Image, Dimensions, SafeAreaView, 
+     Alert} from 'react-native';
 import {wScale, hScale, SCREEN_WIDTH, SCREEN_HEIGHT} from '../../utils/scaling';
 import RegularText from '../../component/ui/regular-text'
 import react, {useEffect,useRef, useState} from 'react';
@@ -44,23 +45,37 @@ export default function Shower(){
             nextAppState === 'active'
           ) {
             console.log('App has come to the foreground!');
-            // 앱의 상태가 변경될 시점 기준으로 씻기를 완료하기까지 남은 시간(sec)
-            // const remain = Math.floor((washingCompletedTime - new Date().getTime())/(1000));
-            // setCurrentRemainTime(remain);
-            // const persent = 1 - (remain/washingTime);
-            // setWashingTimePersent(persent);
-            // const animeatedValue_ = new Animated.Value(SCREEN_HEIGHT * persent);
-            // setAnimatedValue(new Animated.Value(SCREEN_HEIGHT * persent));
-            // console.log('남은 시간 : '+ remain);
           }
     
           appState.current = nextAppState;
           setAppStateVisible(appState.current);
           console.log('AppState', appState.current);
         });
+
+        navigation.addListener('beforeRemove', (e) => {
+            // Prevent default behavior of leaving the screen
+            e.preventDefault();
+    
+            // Prompt the user before leaving the screen
+            Alert.alert(
+              '준비를 그만두시겠습니까?',
+              '아직 준비를 완료하지 않으셨어요. 되돌아가시겠습니까?',
+              [
+                { text: "계속하기", style: 'cancel', onPress: () => {} },
+                {
+                  text: '그만두기',
+                  style: 'destructive',
+                  // If the user confirmed, then we dispatch the action we blocked earlier
+                  // This will continue the action that had triggered the removal of the screen
+                  onPress: () => navigation.dispatch(e.data.action),
+                },
+              ]
+            );
+        });
     
         return () => {
           subscription.remove();
+          navigation.removeListener();
         };
       }, []);
 
@@ -85,26 +100,9 @@ export default function Shower(){
                 return Math.floor((washingCompletedTime - new Date().getTime())/(1000));
             });
         }, 1000);
-        // interval2 = setInterval(() => {
-        //     const remain = (washingCompletedTime - new Date().getTime())/(1000);
-        //     setCurrentRemainTime(remain);
-        //     const persent = 1 - (remain/washingTime);
-        //     setWashingTimePersent(persent);
-        //     setTime((prevTime) => {
-        //         if(prevTime <= 1){
-        //             clearInterval(interval2);
-        //             setIsRunning(false);
-        //             autoModalOpen();
-        //             return 0;
-        //         }
-        //         return Math.floor((washingCompletedTime - new Date().getTime())/(1000));
-        //     })
-        // }, 10);
         return () => {
             clearInterval(interval);
-            // clearInterval(interval2);
         }
-        
     }
     }, [isRunning]);
     
