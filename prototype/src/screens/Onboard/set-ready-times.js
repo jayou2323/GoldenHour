@@ -77,7 +77,7 @@ export default function SetReadyTimes() {
 
     const timeMarker = (value, max) => {
         return (
-            <View style={[{marginLeft:value * 230/(max+1)}, styles.timeMarker]}>
+            <View style={[{marginLeft:value * wScale(240)/(max+1)}, styles.timeMarker]}>
                 <View style={styles.timeMarker_child_1}>
                     <RegularText style={styles.timeMarker_child_1_child}>{value}분</RegularText>
                 </View>
@@ -186,28 +186,27 @@ const styles = StyleSheet.create({
         bottom:wScale(75)
     },
     slider:{
-        // width:wScale(290),
         ...Platform.select({
             ios:{
                 width:wScale(290),
             },
             android: {
-                // transformOrigin:'20%',
-                // transform: [{ scale : 2 }],
-                width:wScale(290),
-                // marginLeft:(-15),
+                transformOrigin:'15%',
+                transform: [{ scale : 2 }],
+                width:wScale(180),
                 height:hScale(40),
-                
             }
         }),
     },
     timeMarker:{ // 0 ~ 230
+        alignItems:'center',
+        width:wScale(75),
     },
     timeMarker_child_1_child:{
         fontFamily:'Pretendard-SemiBold',
         fontSize:wScale(18),
-        lineHeight:hScale(30),
-        textAlign:'center'
+        lineHeight:hScale(33),
+        textAlign:'center',
     },
     timeMarker_child_1:{
         width:wScale(54),
@@ -218,6 +217,6 @@ const styles = StyleSheet.create({
     },
     timeMarker_child_2:{
         fontFamily:'Pretendard-Light',
-        fontSize:wScale(10)
+        fontSize:wScale(10),
     },
 })
