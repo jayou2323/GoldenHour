@@ -41,8 +41,8 @@ export default function Onboard_2() {
     }
     const nextScreen = () => {
         if(validation()){
-            dispatch(setDeparture(departure_.getTime()));
             dispatch(setArrival(arrival_.getTime()));
+            dispatch(setDeparture(departure_.getTime()));
             navigation.navigate('set_ready_time');
         }
     }

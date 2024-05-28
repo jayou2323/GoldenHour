@@ -120,6 +120,7 @@ export default function Shower(){
     }
 
     const formattedTime = (time) => {
+        time = time > 0 ? time : 0;
         const hour = Math.floor(time / 3600);
         const remainingSeconds = time % 3600;
         const minute = Math.floor(remainingSeconds / 60);

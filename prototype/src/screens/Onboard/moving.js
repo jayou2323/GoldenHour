@@ -1,17 +1,16 @@
 import { Animated, StyleSheet, Text, View, Dimensions } from 'react-native';
-import {wScale, hScale} from '../../utils/scaling';
+import {wScale, hScale, SCREEN_HEIGHT} from '../../utils/scaling';
 import RegularText from '../../component/ui/regular-text'
 import {useEffect,useRef, useState} from 'react';
 import CircleButton from '../../component/ui/buttons/circle-button';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 
-const {height} = Dimensions.get('window');
 export default function Moving(){
     const arrival = useSelector((state) => state.time.arrival)
 
     const [remainTime, setRemainTime] = useState(Math.floor((arrival - new Date().getTime())/1000));
-    const [time, setTime] = useState(0);
+    const [time, setTime] = useState(Math.floor((arrival - new Date().getTime())/1000));
     const [isRunning, setIsRunning] = useState(false);
     const animatedValue = useRef(new Animated.Value(0)).current;
     const navigation = useNavigation();
@@ -22,14 +21,13 @@ export default function Moving(){
         let interval;
         if (isRunning){
             Animated.timing(animatedValue, {
-            toValue: height,
+            toValue: SCREEN_HEIGHT,
             duration: remainTime * 1000, // 남은 시간 넣어야함. 
             useNativeDriver: false,
-        
         }).start();
         interval = setInterval(() => {
             setTime((prevTime) => {
-                return Math.floor((new Date().getTime() - pressedTime) / 1000);
+                return Math.floor((arrival - new Date().getTime()) / 1000);
             })
         }, 1000);
         return () => clearInterval(interval);
@@ -42,7 +40,7 @@ export default function Moving(){
         setIsArrival(false);
         setRemainTime(Math.floor((arrival - new Date().getTime())/1000));
         setIsRunning(true);
-        Animated.timing(animatedValue).stop();
+        // Animated.timing(animatedValue).stop();
     }
     
     const pressArrival = () => {
@@ -53,6 +51,7 @@ export default function Moving(){
     }
 
     const formattedTime = (time) => {
+        time = time > 0 ? time : 0;
         const hour = Math.floor(time / 3600);
         const remainingSeconds = time % 3600;
         const minute = Math.floor(remainingSeconds / 60);
@@ -77,7 +76,7 @@ export default function Moving(){
                 <RegularText style={styles.text1}>{formattedTime(time)}</RegularText>
                 {isArrival ? <CircleButton children='출발' color="#FFFA7A" onPress={() => pressDepart()}/> : depart()}
             </View>
-            <Animated.View style={[styles.colorback,{ height: animatedValue.interpolate({inputRange: [0, height],outputRange: [0,height],})}]} />    
+            <Animated.View style={[styles.colorback,{ height: animatedValue.interpolate({inputRange: [0, SCREEN_HEIGHT],outputRange: [0,SCREEN_HEIGHT],})}]} />    
         </View>
     )
     
