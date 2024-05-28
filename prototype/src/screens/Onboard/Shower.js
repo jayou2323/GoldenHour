@@ -16,23 +16,17 @@ export default function Shower(){
     const appState = useRef(AppState.currentState);
     const [appStateVisible, setAppStateVisible] = useState(appState.current); 
 
+    // 옷입고 준비하기에서 아낀 시간
+    const savedEtcTime = useSelector((state) => state.readyTime.savedEtcTime);
     // 씻기를 완료한 시점(ms)
     const washingCompletedTime = useSelector((state) => state.readyTime.washingCompletedTime);
-    // 씻기를 위해 할당된 시간(초)
-    const washingTime = useSelector((state) => state.readyTime.washingTime) * 60;
-    // 화면이 로드된 시점에서 씻기를 완료하기까지 남은 시간(초)
-    // const [currentRemainTime, setCurrentRemainTime] = useState(Math.floor((washingCompletedTime - new Date().getTime())/(1000)));
-    // 전체 씻기 시간에서 소비한 시간의 비율
-    // const [washingTimePersent, setWashingTimePersent] = useState(1 - (currentRemainTime/washingTime));
+    const etcCompletedTime = useSelector((state) => state.readyTime.etcCompletedTime);
 
     const [timeLeft, setTimeLeft] = useState();
-    // const [time, setTime] = useState(Math.floor((washingCompletedTime - new Date().getTime())/(1000)));
-    const [time, setTime] = useState(washingTime);
+    const [time, setTime] = useState(Math.floor((washingCompletedTime - new Date().getTime())/(1000)) - savedEtcTime);
     const [isRunning, setIsRunning] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
     const [failModalOpen, setFailModalOpen] = useState(false);
-    // const [animatedValue, setAnimatedValue] = useState(new Animated.Value(SCREEN_HEIGHT * washingTimePersent));
-    // const [animatedValue, setAnimatedValue] = useState(new Animated.Value(SCREEN_HEIGHT * washingTimePersent));
     animatedValue = useRef(new Animated.Value(0)).current;
     const navigation = useNavigation();
 
@@ -97,7 +91,9 @@ export default function Shower(){
                     autoModalOpen();
                     return 0;
                 }
-                return Math.floor((washingCompletedTime - new Date().getTime())/(1000));
+                const remain = 
+                    (Math.floor((washingCompletedTime - new Date().getTime())/(1000)) - savedEtcTime);
+                return remain > 0 ? remain : 0;
             });
         }, 1000);
         return () => {
@@ -118,7 +114,6 @@ export default function Shower(){
         setFailModalOpen(true);
     }
     
-
     const onPressModalClose = () => {
         setModalOpen(false);
         setFailModalOpen(false);
@@ -145,7 +140,17 @@ export default function Shower(){
             dispatch(setSavedWashingTime(time));
         }
         onPressModalClose();
-        navigation.navigate('Clothing');
+        // 옷입고 준비하기 완료할 시간이 이미 지났을 경우 moving 스크린으로 이동
+        if((parseInt(etcCompletedTime) - new Date().getTime()) <= 0){
+            navigation.navigate('Moving');
+        } else {
+            // 씻기가 옷입기보다 나중이라면 moving 스크린으로 이동
+            // 씻기가 옷입기보다 먼저라면 Clothing 스크린으로 이동
+            if(parseInt(washingCompletedTime) > parseInt(etcCompletedTime))
+                navigation.navigate('Moving');
+            else
+                navigation.navigate('Clothing');
+        }
     }
 
     return(

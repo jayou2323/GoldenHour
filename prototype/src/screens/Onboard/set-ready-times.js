@@ -35,11 +35,6 @@ export default function SetReadyTimes() {
         setSpareTime(val - washingTime - etcTime);
         hapticsFeedback();
     }
-    // function onCompleteTotalReadyTime(val){
-    //     // setMaxWashingTime(val);
-    //     setSpareTime(val - washingTime - etcTime);
-    //     hapticsFeedback();
-    // }
     function onChangeWashingTime(val){
         setWashingTime(val);
         setSpareTime(totalReadyTime - val - etcTime);
@@ -50,16 +45,27 @@ export default function SetReadyTimes() {
         setSpareTime(totalReadyTime - washingTime - val);
         hapticsFeedback();
     }
-    function start(){
+    function start(next){
         currentTime = new Date().getTime()
         dispatch(readyTimeSlice.setTotalReadyCompletedTime(currentTime + (totalReadyTime*1000*60)));
-        dispatch(readyTimeSlice.setWashingCompletedTime(currentTime + (washingTime*1000*60)));
-        dispatch(readyTimeSlice.setEtcCompletedTime(currentTime + ((washingTime + etcTime)*1000*60)));
         dispatch(readyTimeSlice.setTotalReadyTime(totalReadyTime));
         dispatch(readyTimeSlice.setWashingTime(washingTime));
         dispatch(readyTimeSlice.setEtcTime(etcTime));
-        navigation.navigate('Shower');
         hapticsFeedback();
+        if(next === 'washing'){ // 씻기 먼저 시작할 시
+            // 씻기 완료하는 시간 = 현재 시간 + 씻는데 걸리는 시간
+            dispatch(readyTimeSlice.setWashingCompletedTime(currentTime + (washingTime*1000*60)));
+            // 옷입기 완료하는 시간 = 현재 시간 + 씻는데 걸리는 시간 + 옷입는데 걸리는 시간
+            dispatch(readyTimeSlice.setEtcCompletedTime(currentTime + ((washingTime + etcTime)*1000*60)));
+            navigation.navigate('Shower');
+        }
+        else{ // 옷입기 먼저 시작할 시
+            // 옷입기 완료하는 시간 = 현재 시간 + 옷입는데 걸리는 시간
+            dispatch(readyTimeSlice.setEtcCompletedTime(currentTime + (etcTime*1000*60)));
+            // 씻기 완료하는 시간 = 현재 시간 + 옷입는데 걸리는 시간 + 씻는데 걸리는 시간
+            dispatch(readyTimeSlice.setWashingCompletedTime(currentTime + ((washingTime + etcTime)*1000*60)));
+            navigation.navigate('Clothing');
+        }
     }
 
     const RemainTime = spareTime >= 0 ?
@@ -120,7 +126,7 @@ export default function SetReadyTimes() {
                     boldText = "씻는 시간",
                     smallText = "챙겨야 할 준비물은 다 생각하셨나요?",
                     maximumValue = maxWashingTime, 
-                    lowerLimit = 1,
+                    lowerLimit = 0,
                     upperLimit = maximumReadyTime - etcTime,
                     value = washingTime, 
                     onValueChang = (val) => onChangeWashingTime(val), 
@@ -129,13 +135,16 @@ export default function SetReadyTimes() {
                     boldText = "옷입고 준비하는 시간",
                     smallText = "챙겨야 할 준비물은 다 생각하셨나요?", 
                     maximumValue = maxWashingTime, 
-                    lowerLimit = 1,
+                    lowerLimit = 0,
                     upperLimit = maximumReadyTime - washingTime,
                     value = etcTime, 
                     onValueChang = (val) => onChangeEtcTime(val), 
                 )}
             </View>
-            <FullSizeButton style={styles.button} onPress={start}>준비시작!</FullSizeButton>
+            <View style={styles.buttonArea}>
+                <FullSizeButton style={[styles.button, {marginRight:wScale(347) * 0.05}]} onPress={() => start('washing')}>씻기 먼저 시작!</FullSizeButton>
+                <FullSizeButton style={styles.button} onPress={() => start('clothing')}>옷입기 먼저 시작!</FullSizeButton>
+            </View>
         </View>
     );
 }
@@ -173,8 +182,14 @@ const styles = StyleSheet.create({
         marginTop:hScale(10)
     },
     button:{
+        width: wScale(347) * 0.4525,
+    },
+    buttonArea:{
+        flexDirection:'row',
         position:'absolute',
-        bottom:wScale(75)
+        justifyContent:'center',
+        bottom:wScale(75),
+        width: '100%',
     },
     slider:{
         ...Platform.select({

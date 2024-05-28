@@ -14,6 +14,7 @@ const {height} = Dimensions.get('window');
 
 export default function Clothing(){
     const savedWasingTime = useSelector((state) => state.readyTime.savedWasingTime);
+    const washingCompletedTime = useSelector((state) => state.readyTime.washingCompletedTime);
     const etcCompletedTime = useSelector((state) => state.readyTime.etcCompletedTime);
 
     const [time, setTime] = useState(Math.floor((etcCompletedTime - new Date().getTime())/(1000)) - savedWasingTime);
@@ -42,7 +43,9 @@ export default function Clothing(){
                     autoModalOpen();
                     return 0;
                 }
-                return Math.floor((etcCompletedTime - new Date().getTime())/(1000)) - savedWasingTime;
+                const remain = 
+                    Math.floor((etcCompletedTime - new Date().getTime())/(1000)) - savedWasingTime;
+                return remain > 0 ? remain : 0;
             })
         }, 1000);
         return () => clearInterval(interval);
@@ -83,6 +86,24 @@ export default function Clothing(){
         return `${minute.toString().padStart(1, '0')} 분 ${second.toString().padStart(1, '0')} 초`;
     }
 
+    const onModalNext = () => {
+        if(time > 0){
+            dispatch(setSavedEtcTime(time));
+        }
+        onPressModalClose();
+        // 씻기 완료할 시간이 이미 지났을 경우 moving 스크린으로 이동
+        if((parseInt(washingCompletedTime) - new Date().getTime()) <= 0){
+            navigation.navigate('Moving');
+        } else {
+            // 옷입기가 씻기보다 나중이라면 moving 스크린으로 이동
+            // 옷입기가 씻기보다 먼저라면 Shower 스크린으로 이동
+            if(parseInt(washingCompletedTime) < parseInt(etcCompletedTime))
+                navigation.navigate('Moving');
+            else
+                navigation.navigate('Shower');
+        }
+    }
+
     return(
         <View style={styles.background}>
             <View style={styles.component}>
@@ -99,7 +120,7 @@ export default function Clothing(){
                 <View style={styles.modal}>
                     <Image source={Success} style={styles.img}></Image>
                     <RegularText style={styles.modalText}>{formattedTime2(time)} 아끼셨네요</RegularText>
-                    <ModalBtn style={styles.btn}children='다음' onPress={()=>{onPressModalClose(); navigation.navigate('Moving');}}/>
+                    <ModalBtn style={styles.btn}children='다음' onPress={onModalNext}/>
                 </View>
                 </View>
             </Modal>
@@ -111,7 +132,7 @@ export default function Clothing(){
                     <Image source={Success} style={styles.img}></Image>
                     <RegularText style={styles.modalText}>지각 예정이에요..!</RegularText>
                     <RegularText style={styles.modalText}>서둘러 주세요.</RegularText>
-                    <ModalBtn style={styles.btn}children='다음' onPress={()=>{onPressModalClose(); navigation.navigate('Moving');}}/>
+                    <ModalBtn style={styles.btn}children='다음' onPress={onModalNext}/>
                 </View>
                 </View>
             </Modal>
