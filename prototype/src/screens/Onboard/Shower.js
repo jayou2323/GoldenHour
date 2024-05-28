@@ -51,20 +51,20 @@ export default function Shower(){
             e.preventDefault();
     
             // Prompt the user before leaving the screen
-            Alert.alert(
-              '준비를 그만두시겠습니까?',
-              '아직 준비를 완료하지 않으셨어요. 되돌아가시겠습니까?',
-              [
-                { text: "계속하기", style: 'cancel', onPress: () => {} },
-                {
-                  text: '그만두기',
-                  style: 'destructive',
-                  // If the user confirmed, then we dispatch the action we blocked earlier
-                  // This will continue the action that had triggered the removal of the screen
-                  onPress: () => navigation.dispatch(e.data.action),
-                },
-              ]
-            );
+            // Alert.alert(
+            //   '준비를 그만두시겠습니까?',
+            //   '아직 준비를 완료하지 않으셨어요. 되돌아가시겠습니까?',
+            //   [
+            //     { text: "계속하기", style: 'cancel', onPress: () => {} },
+            //     {
+            //       text: '그만두기',
+            //       style: 'destructive',
+            //       // If the user confirmed, then we dispatch the action we blocked earlier
+            //       // This will continue the action that had triggered the removal of the screen
+            //       onPress: () => navigation.dispatch(e.data.action),
+            //     },
+            //   ]
+            // );
         });
     
         return () => {
